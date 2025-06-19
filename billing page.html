@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient QR Code Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+
+    .image {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+
+    .form-row label {
+      flex: 1 0 120px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .form-row input[type="text"],
+    .form-row input[type="number"],
+    .form-row select {
+      flex: 2;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-row input[type="text"]:hover,
+    .form-row input[type="number"]:hover,
+    .form-row select:hover {
+      border-color: #1976d2;
+    }
+
+    .form-row input[type="text"]:focus,
+    .form-row input[type="number"]:focus,
+    .form-row select:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    }
+
+    .Go {
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      background: #1976d2;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .Go:hover {
+      background: #135a9c;
+      transform: scale(1.05);
+    }
+
+    .blood-test-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 2;
+    }
+
+    .blood-test-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .blood-test-row select {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .btn-small {
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .btn-small:hover {
+      background: #ddd;
+      transform: scale(1.1);
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button-group button {
+      flex: 1;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #generateBtn {
+      background-color: #1976d2;
+    }
+
+    #generateBtn:hover {
+      background-color: #135a9c;
+      box-shadow: 0 0 8px rgba(25, 118, 210, 0.4);
+    }
+
+    #clearBtn {
+      background-color: #f44336;
+    }
+
+    #clearBtn:hover {
+      background-color: #d32f2f;
+      box-shadow: 0 0 8px rgba(244, 67, 54, 0.3);
+    }
+
+    .output-display {
+      margin-top: 30px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .output-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .output-header img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .credit-bill-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+
+    .code-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin: 15px 0;
+    }
+
+    #qrcode {
+      margin: 0;
+      width: 150px;
+      height: 150px;
+    }
+
+    #barcode {
+      height: 50px;
+      margin-top: 10px;
+    }
+
+    #displayInfo {
+      margin-bottom: 15px;
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-column {
+      flex: 1;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .info-column.left {
+      text-align: left;
+    }
+
+    .info-column.center {
+      text-align: center;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+    }
+
+    .info-column.right {
+      text-align: right;
+    }
+
+    #displayInfo p {
+      margin: 6px 0;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .divider {
+      height: 60px;
+      border-left: 1px solid #ddd;
+      margin: 0 10px;
+      align-self: center;
+    }
+
+    #datetime {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .download-print-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .download-print-buttons button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #downloadBtn {
+      background-color: #4caf50;
+    }
+
+    #downloadBtn:hover {
+      background-color: #3d8b40;
+    }
+
+    #printBtn {
+      background-color: #607d8b;
+    }
+
+    #printBtn:hover {
+      background-color: #546e7a;
+    }
+
+    /* New styles for test table */
+    .test-table {
+      width: 100%;
+      margin: 15px 0;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .test-table th, .test-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .test-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    .test-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .total-row {
+      font-weight: bold;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333 !important;
+    }
+
+    .total-row td {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    .test-table .price-col {
+      text-align: right;
+      padding-right: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .form-row label {
+        flex: none;
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .form-row input,
+      .form-row select,
+      .blood-test-inputs {
+        width: 100%;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+
+      .code-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #displayInfo {
+        flex-direction: column;
+      }
+
+      .info-column {
+        padding: 0;
+        text-align: left !important;
+        font-size: 12px;
+        border-left: none !important;
+        border-right: none !important;
+      }
+
+      .divider {
+        display: none;
+      }
+
+      .test-table {
+        font-size: 12px;
+      }
+      .test-table .price-col {
+        padding-right: 10px;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-output, #printable-output * {
+        visibility: visible;
+      }
+      #printable-output {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+      }
+      .download-print-buttons {
+        display: none !important;
+      }
+      .test-table {
+        width: 95% !important;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .test-table .price-col {
+        padding-right: 20px !important;
+      }
+      .container {
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>   
+<body>
+  
+  <div class="container">
+    <img src="Logo.jpg" alt="Annai Medical College & Hospital" class="image" id="img">
+    <hr>
+    <form id="qrForm">
+      <div class="form-row">
+        <label for="patientId">Patient ID:</label>
+        <input type="number" id="patientId" required>
+        <button type="button" class="Go" onclick="goButton()">Go</button>
+      </div>
+
+      <div class="form-row">
+        <label for="type">Patient Type:</label>
+        <select id="type" onchange="toggleInpatientId()" required>
+          <option value="">---Select Type---</option>
+          <option value="Out-Patient">Out-Patient</option>
+          <option value="In-Patient">In-Patient</option>
+        </select>
+      </div>
+
+      <div class="form-row" id="inpatientSection" style="display: none;">
+        <label for="inpatientId">In-Patient ID:</label>
+        <input type="text" id="inpatientId">
+      </div>
+
+      <div class="form-row">
+        <label for="name">Patient Name:</label>
+        <input type="text" id="name" required>
+      </div>
+
+      <div class="form-row">
+        <label for="SampleId">Sample ID:</label>
+        <input type="text" id="SampleId" required>
+      </div>
+
+      <div class="form-row">
+        <label for="gender">Gender:</label>
+        <select id="gender" required>
+          <option value="">---Select Gender---</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="age">Age:</label>
+        <input type="number" id="age" required>
+      </div>
+
+      <div class="form-row">
+        <label for="bloodGroup">Blood Group:</label>
+        <select id="bloodGroup">
+          <option value="">---Select Blood Group---</option>
+          <option>A+</option>
+          <option>A-</option>
+          <option>B+</option>
+          <option>B-</option>
+          <option>AB+</option>
+          <option>AB-</option>
+          <option>O+</option>
+          <option>O-</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Lab Test:</label>
+        <div class="blood-test-inputs">
+          <div class="blood-test-row">
+            <select class="bloodTest" required>
+              <option value="">--Select Test--</option>
+              <option value="CBC">CBC</option>
+              <option value="Glucose">Glucose</option>
+              <option value="Cholesterol">Cholesterol</option>
+              <option value="Liver Function">Liver Function</option>
+              <option value="Thyroid">Thyroid</option>
+            </select>
+            <button type="button" class="btn-small" onclick="addBloodTest()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="payment">Payment Method:</label>
+        <select id="payment" required>
+          <option value="">---Select Payment---</option>
+          <option>Cash</option>
+          <option>Card</option>
+          <option>Company</option>
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="clearBtn" onclick="clearForm()">Clear</button>
+        <button type="button" id="generateBtn" onclick="generateQRCode()">Generate QR</button>
+      </div>
+    </form>
+
+    <div class="output-display" id="printable-output">
+      <div class="output-header">
+        <img src="Logo.jpg" alt="Hospital Logo" class="image">
+        <hr>
+        <div class="credit-bill-title">Credit Bill</div>
+        <hr>
+        <div class="code-container">
+          <canvas id="qrcode"></canvas>
+          <canvas id="barcode"></canvas>
+        </div>
+      </div>
+      <div id="displayInfo"></div>
+      <hr>
+      <!-- Test Table will be inserted here by JavaScript -->
+      <div id="testTableContainer"></div>
+      
+      <div id="datetime"></div>
+    </div>
+
+    <div class="download-print-buttons">
+      <button id="downloadBtn" onclick="downloadQR()">Download QR</button>
+      <button id="printBtn" onclick="window.print()">Print</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script>
+    let qr;
+    // Test prices mapping
+    const testPrices = {
+      "CBC": 500,
+      "Glucose": 300,
+      "Cholesterol": 400,
+      "Liver Function": 600,
+      "Thyroid": 550
+    };
+
+    function goButton() {
+      const patientId = document.getElementById("patientId").value.trim();
+      if (!patientId) {
+        alert("Please enter a Patient ID.");
+        return;
+      }
+
+      // This is a mock implementation since we don't have a real API endpoint
+      console.log(`Fetching patient data for ID: ${patientId}`);
+      alert("This is a demo. In a real app, this would fetch patient data.");
+      
+      // Mock data - replace with actual API call
+      const mockData = {
+        type: "Out-Patient",
+        inpatientId: "",
+        SampleId: "1234",
+        name: "John Doe",
+        gender: "Male",
+        age: 35,
+        bloodGroup: "A+",
+        bloodTests: ["CBC"],
+        payment: "Cash"
+      };
+      
+      // Populate the form with mock data
+      document.getElementById("type").value = mockData.type;
+      toggleInpatientId();
+      document.getElementById("inpatientId").value = mockData.inpatientId || "";
+      document.getElementById("SampleId").value = mockData.SampleId;
+      document.getElementById("name").value = mockData.name;
+      document.getElementById("gender").value = mockData.gender;
+      document.getElementById("age").value = mockData.age;
+      document.getElementById("bloodGroup").value = mockData.bloodGroup;
+      document.getElementById("payment").value = mockData.payment;
+
+      // Clear existing blood test rows
+      const bloodTestInputsDiv = document.querySelector(".blood-test-inputs");
+      bloodTestInputsDiv.innerHTML = "";
+
+      // Add first blood test row
+      const firstRow = document.createElement("div");
+      firstRow.className = "blood-test-row";
+      firstRow.innerHTML = `
+        <select class="bloodTest" required>
+          <option value="">--Select Test--</option>
+          <option value="CBC" selected>CBC</option>
+          <option value="Glucose">Glucose</option>
+          <option value="Cholesterol">Cholesterol</option>
+          <option value="Liver Function">Liver Function</option>
+          <option value="Thyroid">Thyroid</option>
+        </select>
+        <button type="button" class="btn-small" onclick="addBloodTest()">+</button>
+      `;
+      bloodTestInputsDiv.appendChild(firstRow);
+    }
+
+    function toggleInpatientId() {
+      const type = document.getElementById("type").value;
+      const section = document.getElementById("inpatientSection");
+      section.style.display = type === "In-Patient" ? "flex" : "none";
+      if (type !== "In-Patient") {
+        document.getElementById("inpatientId").value = "";
+      }
+    }
+
+    function addBloodTest() {
+      const bloodTestInputsDiv = document.querySelector(".blood-test-inputs");
+      const newRow = document.createElement("div");
+      newRow.className = "blood-test-row";
+      newRow.innerHTML = `
+        <select class="bloodTest" required>
+          <option value="">--Select Test--</option>
+          <option value="CBC">CBC</option>
+          <option value="Glucose">Glucose</option>
+          <option value="Cholesterol">Cholesterol</option>
+          <option value="Liver Function">Liver Function</option>
+          <option value="Thyroid">Thyroid</option>
+        </select>
+        <button type="button" class="btn-small" onclick="removeBloodTest(this)">−</button>
+      `;
+      bloodTestInputsDiv.appendChild(newRow);
+    }
+
+    function removeBloodTest(button) {
+      const row = button.closest(".blood-test-row");
+      const allRows = document.querySelectorAll(".blood-test-row");
+      if (allRows.length > 1) {
+        row.remove();
+      } else {
+        alert("At least one lab test is required.");
+      }
+    }
+    
+    function generateQRCode() {
+      const patientId = document.getElementById("patientId").value;
+      const type = document.getElementById("type").value;
+      const inpatientId = document.getElementById("inpatientId").value;
+      const SampleId = document.getElementById("SampleId").value;
+      const name = document.getElementById("name").value;
+      const gender = document.getElementById("gender").value;
+      const age = document.getElementById("age").value;
+      const bloodGroup = document.getElementById("bloodGroup").value;
+      const payment = document.getElementById("payment").value;
+
+      const bloodTests = Array.from(document.querySelectorAll(".bloodTest"))
+        .map(select => select.value.trim())
+        .filter(v => v);
+
+      if (!patientId || !type || !name || !gender || !age || !payment || bloodTests.length === 0) {
+        alert("Please fill in all required fields, including at least one lab test.");
+        return;
+      }
+
+      const qrObject = {
+        patientId,
+        type,
+        inpatientId: type === "In-Patient" ? (inpatientId || 'N/A') : null,
+        SampleId,
+        name,
+        gender,
+        age,
+        bloodGroup,
+        bloodTests,
+        payment
+      };
+
+      const qrData = JSON.stringify(qrObject);
+      
+      // Clear previous QR code if exists
+      const qrCanvas = document.getElementById("qrcode");
+      qrCanvas.innerHTML = "";
+      
+      // Create new QR code
+      qr = new QRious({
+        element: qrCanvas,
+        value: qrData,
+        size: 150,
+        level: 'H'
+      });
+
+      // Generate barcode
+      try {
+        JsBarcode("#barcode", patientId, {
+          format: "CODE128",
+          lineColor: "#000",
+          width: 2,
+          height: 50,
+          displayValue: true,
+          fontSize: 16,
+          margin: 10
+        });
+      } catch (e) {
+        console.error("Barcode generation error:", e);
+      }
+
+      const infoDiv = document.getElementById("displayInfo");
+      infoDiv.innerHTML = `
+        <div class="info-column left">
+          <p><strong>Patient ID:</strong> ${patientId}</p>
+          ${type === "In-Patient" && inpatientId ? `<p><strong>In-Patient ID:</strong> ${inpatientId}</p>` : ''}
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Patient Type:</strong> ${type}</p>
+        </div>
+        <div class="divider"></div>
+        <div class="info-column center">
+          <p><strong>Sample ID:</strong> ${SampleId}</p>
+          <p><strong>Gender:</strong> ${gender}</p>
+          <p><strong>Age:</strong> ${age}</p>
+        </div>
+        <div class="divider"></div>
+        <div class="info-column right">
+          ${bloodGroup ? `<p><strong>Blood Group:</strong> ${bloodGroup}</p>` : ''}
+          <p><strong>Payment:</strong> ${payment}</p>
+        </div>
+      `;
+
+      // Generate test table
+      const tableContainer = document.getElementById("testTableContainer");
+      tableContainer.innerHTML = '';
+      
+      const table = document.createElement('table');
+      table.className = 'test-table';
+      
+      // Create table header
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr>
+          <th>S.No</th>
+          <th>Lab Test</th>
+          <th class="price-col">Price (₹)</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+      
+      // Create table body
+      const tbody = document.createElement('tbody');
+      let total = 0;
+      
+      bloodTests.forEach((test, index) => {
+        const price = testPrices[test] || 0;
+        total += price;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${test}</td>
+          <td class="price-col">₹${price}</td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      // Add total row
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `
+        <td colspan="2">Total</td>
+        <td class="price-col">₹${total}</td>
+      `;
+      tbody.appendChild(totalRow);
+      
+      table.appendChild(tbody);
+      tableContainer.appendChild(table);
+
+      const now = new Date();
+      document.getElementById("datetime").innerText = `Generated: ${now.toLocaleString()}`;
+
+      // Show the output section
+      document.getElementById("printable-output").style.display = "block";
+      document.querySelector(".download-print-buttons").style.display = "flex";
+    }
+
+    function clearForm() {
+      document.getElementById("qrForm").reset();
+      document.getElementById("inpatientSection").style.display = "none";
+
+      const bloodTestInputsDiv = document.querySelector(".blood-test-inputs");
+      const bloodTestRows = bloodTestInputsDiv.querySelectorAll(".blood-test-row");
+      bloodTestRows.forEach((row, index) => {
+        if (index > 0) row.remove();
+        else row.querySelector("select").value = "";
+      });
+
+      document.getElementById("displayInfo").innerHTML = "";
+      document.getElementById("testTableContainer").innerHTML = "";
+      document.getElementById("qrcode").innerHTML = "";
+      document.getElementById("barcode").innerHTML = "";
+      document.getElementById("datetime").innerText = "";
+      document.getElementById("printable-output").style.display = "none";
+      document.querySelector(".download-print-buttons").style.display = "none";
+    }
+
+    function downloadQR() {
+      if (!qr) {
+        alert("Please generate a QR code first.");
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = document.getElementById("qrcode").toDataURL("image/png");
+      link.download = 'patient_qrcode.png';
+      link.click();
+    }
+  </script>
+</body>
+</html>
